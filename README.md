@@ -17,48 +17,44 @@ XXXXXXX = Camera / Magnetic / Light_Sensor
 
 Task List
 -----------
-Camera
------------
+**Camera**
 
-1.	Derivers / Libraries / Functions 
+1.Derivers / Libraries / Functions 
 - camera.c and camera.h (e.g camera_init(); track_detection(); and related ) (Charmy) 
 - LCD.c and LCD.h from STM32 to Freescale (Charmy) 
 
-2.	main.c, isr.c, isr.h, include.h, common.h for Camera group (Charmy) 
+2.main.c, isr.c, isr.h, include.h, common.h for Camera group (Charmy) 
 - Integrate under …\GitHub\inno-IAR-2013\src\app\Camera_app
 - Final and/or enhanced 
 
-3.	Any modified codes and libraries after inno-IAR.zip from Smart Car 2012
+3.Any modified codes and libraries after inno-IAR.zip from Smart Car 2012
 
-Electromagnetic
------------
+**Electromagnetic**
 
-1.	Derivers / Libraries / Functions 
+1.Derivers / Libraries / Functions 
 - enhanced adc.c (e.g. find_max(); and related) (Ben)
 
-2.	main.c, isr.c, isr.h, include.h, common.h for Magnetic group (Ben)
+2.main.c, isr.c, isr.h, include.h, common.h for Magnetic group (Ben)
 - Integrate under …\GitHub\inno-IAR-2013\src\app\Magnetic_app
 - Final and/or enhanced
 
-3.	Any modified codes and libraries after inno-IAR.zip from Smart Car 2012
+3.Any modified codes and libraries after inno-IAR.zip from Smart Car 2012
 
-Light Sensor
------------
+**Light Sensor**
 
-1.	Derivers / Libraries / Functions 
+1.Derivers / Libraries / Functions 
 - linearccd.c and linearccd.h, LDR (Louis)
 - flash.c and flash.h (John)
 - Try 200 Line Encoders, encoder.c and encoder.h (e.g. encoder_init();) (John)
 - Gyroscope, Kalman filter (Louis and John)
 
-2.  main.c, isr.c, isr.h, include.h, common.h for Light Sensor group
+2.main.c, isr.c, isr.h, include.h, common.h for Light Sensor group
 - Integrate under …\GitHub\inno-IAR-2013\src\app\Light_Sensor_app
 - Final and/or enhanced 
 
-3.  Any modified codes and libraries after inno-IAR.zip from Smart Car 2012
+3.Any modified codes and libraries after inno-IAR.zip from Smart Car 2012
 
-Basic derivers
------------
+**Basic derivers**
 - Pin Test (Yumi)
 
 Conventions
