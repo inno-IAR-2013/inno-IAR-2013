@@ -12,17 +12,17 @@ int dynamic_speed_mode=0;                      // 0: off, 1: on
 int32_t speed_array[5]                = {300           , 600         , 900          , 1200    , 1500};
 int32_t balance_kp_array[5]           = {2804746       , 2650000     , 2725000      , 2781250 , 0}; // 1200 speed can try 2977450
 int32_t balance_kd_array[5]           = {90160         , 107560      , 119160       , 119614  , 0}; // 1200 speed can try 128100
-int32_t balance_offset_array[5]       = {1188          , 1200        , 1200         , 1200    , 0};
+int32_t balance_offset_array[5]       = {1188          , 1188        , 1200         , 1200    , 0};
 int32_t speed_kp_array[5]             = {350000        , 297000      , 297000       , 297000  , 0};
 int32_t speed_ki_array[5]             = {10000         , 53000       , 53000        , 53000   , 0};  // mode 0 : 49500, mode 3 : 60000
-int32_t turn_kp_array[5]              = {580000        , 750000      , 500000       , 31000   , 0};  // 愈細 = 遲入灣 ; 愈大 = 早入灣 , speed 600 : 120500 - speed 900 can try : 49850 ~ 50000 - speed 900: 98800 - speed 1200 can try 36825
-int32_t turn_kd_array[5]              = {0             , 32500       , 18500        , 11250   , 0}; 
+int32_t turn_kp_array[5]              = {650000        , 650000      , 500000       , 31000   , 0};  // 愈細 = 遲入灣 ; 愈大 = 早入灣 , speed 600 : 120500 - speed 900 can try : 49850 ~ 50000 - speed 900: 98800 - speed 1200 can try 36825
+int32_t turn_kd_array[5]              = {0             , 0           , 18500        , 11250   , 0}; 
 int32_t turn_offset_array[5]          = {850           , 850         , 850          , 850     , 0};  // 愈細 = 中心線靠右 ; 愈大 = 中心線靠左  
-float atan_multiply_value_array[5]    = {0.0909808027  ,0.00698080279, 0.00892080279, 0.015015, 0};  // speed 900 can try : 0.00858080279 (larger seems better) - speed 1200 can try 0.01
-int32_t left_start_length_array[5]    = {110            , 31          , 25           , 25      , 0};    
-int32_t right_start_length_array[5]   = {110            , 31          , 25           , 25      , 0};    
+float atan_multiply_value_array[5]    = {0.0909808027  , 0.0909808027, 0.00892080279, 0.015015, 0};  // speed 900 can try : 0.00858080279 (larger seems better) - speed 1200 can try 0.01
+int32_t left_start_length_array[5]    = {110           , 110         , 25           , 25      , 0};    
+int32_t right_start_length_array[5]   = {110           , 110         , 25           , 25      , 0};    
 int32_t ccd_mid_pos_array[5]          = {121           , 121         , 121          , 121     , 121};
-int32_t run_speed_mode = 0;         /*** vaild input : 0 - 4; Refer mode 0: 300 ; mode 1: 600 ; mode 2: 900 ; mode 3: 1200 ; mode 4: 1500***/
+int32_t run_speed_mode = 1;         /*** vaild input : 0 - 4; Refer mode 0: 300 ; mode 1: 600 ; mode 2: 900 ; mode 3: 1200 ; mode 4: 1500***/
 int32_t max_available_mode = 3;
 int32_t smooth_interval_jump_time = 500;         /*** Variable for setting mode to mode interval time ***/
 int32_t stand_and_dont_move_start_time = 6000;   /*** Variable for setting hold time in start area ***/
@@ -239,6 +239,7 @@ void pit3_system_loop(void){
         
         motor_command_left = motor_command_balance - motor_command_speed + motor_turn_left;
         motor_command_right = motor_command_balance - motor_command_speed + motor_turn_right;
+        
         
         /************ set dir pins on both ************/
           if (motor_command_left>0){
