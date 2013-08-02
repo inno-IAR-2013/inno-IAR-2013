@@ -20,13 +20,14 @@ extern u32 system_loop_tick;
 u32 high_continous_time = 0;
 int low_speed_flag = 0;
 int high_speed_flag = 0;
-
+int vaild_pixel = 244;
+ 
 /*** 外內灣 Variable， 數值愈細，愈貼近內灣行 ***/ 
-int left_start_length  = 25;
-int right_start_length = 25;
+int32_t left_start_length  = 25;
+int32_t right_start_length = 25;
 
 /*** 中心位 Variable，愈大愈接近Left edge，愈細愈接近Right edge ***/
-int ccd_mid_pos = 128;         
+int32_t ccd_mid_pos = 121;         
 float atan_multiply_value;
 
 /*********** CCD related counter ************/
@@ -42,24 +43,29 @@ int g_int_ccd_operation_state=0;
 char g_char_ar_ccd_current_pixel[256];        // 1-line pixel array
 
 /************* Variables for direction PID : algorthm 2 *************/
-int current_mid_error_pos=124;
+/*int current_mid_error_pos=124;
 int last_sample_error_pos=124;
 int previous_mid_error_pos=124;
+*/
 
-int current_dir_error=0;
-int current_dir_arc_value_error=0;
-int last_sample_dir_error=124;
+int current_mid_error_pos=121;
+int last_sample_error_pos=121;
+int previous_mid_error_pos=121;
+
+uint32_t current_dir_error=0;
+uint32_t current_dir_arc_value_error=0;
+int last_sample_dir_error=121;
 
 int detect_left_flag=0;
 int detect_right_flag=0;
 
 void output_algorithm_message(); //temp
 
-int current_1st_left_edge=249;
+int current_1st_left_edge=243;
 int current_1st_right_edge=0;
 
-int current_edge_middle_distance=0;
-int previous_edge_middle_distance=0;
+int32_t current_edge_middle_distance=0;
+int32_t previous_edge_middle_distance=0;
 
 extern int encoder_turn_error;
 
@@ -124,13 +130,34 @@ void ccd_output_sample_to_UART(char array[]){
      uart_sendStr(UART3,"CCD Sample: ");
      ccd_print(array);
 }
-  
+  /*
 void ccd_shift_sample_to_manageable_position(char array[]){
       u16 i; 
       for( i = 0 ; i < 250 ; i++){
         array[i] = array[i+2];
       }
       
+      array[250] = 'X';
+      array[251] = 'X';
+      array[252] = 'X';
+      array[253] = 'X';
+      array[254] = 'X';
+      array[255] = 'X';
+}*/
+
+
+void ccd_shift_sample_to_manageable_position(char array[]){
+      u16 i; 
+      for( i = 0 ; i < vaild_pixel ; i++){
+        array[i] = array[i+6];
+      }
+    
+      array[244] = 'X';
+      array[245] = 'X';
+      array[246] = 'X';
+      array[247] = 'X';
+      array[248] = 'X';
+      array[249] = 'X';      
       array[250] = 'X';
       array[251] = 'X';
       array[252] = 'X';
@@ -146,7 +173,7 @@ void ccd_scan_all_white_or_all_black_sample(char array[]){
   all_white_smaple_flag= 0;
   all_black_smaple_flag= 0;
   
-  for( i = 0 ; i < 250 ; i++){
+  for( i = 0 ; i < vaild_pixel ; i++){
         if(array[i] == 'o'){
           white_counter++; 
         }else if(array[i] == 'W'){
@@ -154,21 +181,29 @@ void ccd_scan_all_white_or_all_black_sample(char array[]){
         }
   }
   
-  if(white_counter == 250){
+  if(white_counter == vaild_pixel){
     all_white_smaple_flag = 1;
-  } else if (black_counter == 250){
+  } else if (black_counter == vaild_pixel){
     all_black_smaple_flag = 1;
   }
 }
-
+/*
 void ccd_print(char array[]){
       u16 i;  
       for( i = 0 ; i < 250 ; i++){
-        //uart_putchar(UART3,array[i]); // print sample to UART
+        printf("%c",array[i]); // print sample to UART
+      }
+       printf("\n");
+}*/
+
+void ccd_print(char array[]){
+      u16 i;  
+      for( i = 0 ; i < 256 ; i++){
         printf("%c",array[i]); // print sample to UART
       }
        printf("\n");
 }
+
 
 void ccd_compressed_print(char array[]){
       u16 i;  
@@ -184,7 +219,7 @@ void ccd_recongize_left_right_edge_and_return_dir_error(char array[]){
   volatile int i;
   detect_left_flag = 0;
   detect_right_flag = 0;
-  current_1st_left_edge=249;
+  current_1st_left_edge=243;
   current_1st_right_edge=0;
   
   for( i = last_sample_error_pos ; i > 0 ; i--){ // scan from last_sample_error_pos to left edge
@@ -195,11 +230,11 @@ void ccd_recongize_left_right_edge_and_return_dir_error(char array[]){
     }
   }
   
-  for( i = last_sample_error_pos ; i < 250 ; i++){  // scan from last_sample_error_pos to right edge
+  for( i = last_sample_error_pos ; i < vaild_pixel ; i++){  // scan from last_sample_error_pos to right edge
     if(array[i] == 'W'){
       current_1st_right_edge = i;
       detect_right_flag = 1;
-      i = 249;
+      i = 243;
     }
   }
   
@@ -238,8 +273,8 @@ void ccd_recongize_left_right_edge_and_return_dir_error(char array[]){
     current_mid_error_pos = current_1st_left_edge + right_start_length;
     encoder_turn_error = 0;
     
-    if( current_1st_left_edge == 249){
-      current_mid_error_pos = 124;
+    if( current_1st_left_edge == (vaild_pixel - 1)){
+      current_mid_error_pos = ccd_mid_pos;
     }
     
     if(dynamic_speed_mode == 1){
@@ -256,7 +291,7 @@ void ccd_recongize_left_right_edge_and_return_dir_error(char array[]){
     encoder_turn_error = 0;
     
     if(current_1st_right_edge == 0){
-      current_mid_error_pos = 124;
+      current_mid_error_pos = ccd_mid_pos;
     }
     
     if(dynamic_speed_mode == 1){
@@ -276,24 +311,18 @@ void ccd_recongize_left_right_edge_and_return_dir_error(char array[]){
    /* ---------------------------------------- (no middle noise) Cross road*/ 
   if(all_white_smaple_flag == 1){
     //current_mid_error_pos = ccd_mid_pos+(encoder_turn_error*35/100); // John added
-    //printf("All white detected");
-    current_mid_error_pos = 124;
     
-    /** to be tested in the field **/
+    current_mid_error_pos = ccd_mid_pos;
     
     if(dynamic_speed_mode == 1){
       run_speed_mode = max_available_mode;
     }
   }
   
-  
    /* |||||||||||||||||||||||||||||||||||||||| (all black) */
   if(all_black_smaple_flag == 1){
     //current_mid_error_pos = previous_mid_error_pos;
-    //printf("All black detected");
-    current_mid_error_pos = 124;
-    
-    /** to be tested in the field **/
+    current_mid_error_pos = ccd_mid_pos;
     
     if(dynamic_speed_mode == 1){
       run_speed_mode = (max_available_mode - 1);
@@ -303,15 +332,9 @@ void ccd_recongize_left_right_edge_and_return_dir_error(char array[]){
   current_dir_error = (current_mid_error_pos - ccd_mid_pos);
   current_dir_arc_value_error = atan(current_dir_error*(atan_multiply_value))*1000;
   
-  //printf("\nprevious_mid_error_pos is : %d", previous_mid_error_pos);
-  
   previous_mid_error_pos = current_mid_error_pos;
-  
-  //printf("\ncurrent_mid_error_pos is : %d", current_mid_error_pos);
-  
   last_sample_error_pos = current_mid_error_pos;  
   calculate_two_edge_middle_distance(array);
-  //output_algorithm_message();
 }
 
 void calculate_two_edge_middle_distance(char array[]){
@@ -346,6 +369,6 @@ void output_algorithm_message(){ //temp
   
   printf("\n****** DIR ERROR ******");
   
-  printf("\ncurrent_dir_error is: %d", current_dir_error);
-  printf("\ncurrent_dir_arc_value_error is: %d", current_dir_arc_value_error);
+  printf("\ncurrent_dir_error is: %ld", current_dir_error);
+  //printf("\ncurrent_dir_arc_value_error is: %d", current_dir_arc_value_error);
 }
