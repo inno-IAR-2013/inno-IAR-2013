@@ -10,7 +10,7 @@ int ccd_compressed_print_flag=0;               // 0: off, 1: on
 int dynamic_speed_mode=0;                      // 0: off, 1: on
 /*********** startup PID values ************/
 int32_t speed_array[5]                = {300           , 600         , 900          , 1200    , 1500};
-int32_t balance_kp_array[5]           = {2804746       , 2650000     , 2725000      , 2781250 , 0}; // 1200 speed can try 2977450
+int32_t balance_kp_array[5]           = {2804746       , 2920000     , 2725000      , 2781250 , 0}; // 1200 speed can try 2977450
 int32_t balance_kd_array[5]           = {90160         , 107560      , 119160       , 119614  , 0}; // 1200 speed can try 128100
 int32_t balance_offset_array[5]       = {1188          , 1188        , 1200         , 1200    , 0};
 int32_t speed_kp_array[5]             = {350000        , 297000      , 297000       , 297000  , 0};
@@ -22,7 +22,7 @@ float atan_multiply_value_array[5]    = {0.0909808027  , 0.0909808027, 0.0089208
 int32_t left_start_length_array[5]    = {110           , 110         , 25           , 25      , 0};    
 int32_t right_start_length_array[5]   = {110           , 110         , 25           , 25      , 0};    
 int32_t ccd_mid_pos_array[5]          = {121           , 121         , 121          , 121     , 121};
-int32_t run_speed_mode = 1;         /*** vaild input : 0 - 4; Refer mode 0: 300 ; mode 1: 600 ; mode 2: 900 ; mode 3: 1200 ; mode 4: 1500***/
+int32_t run_speed_mode = 0;         /*** vaild input : 0 - 4; Refer mode 0: 300 ; mode 1: 600 ; mode 2: 900 ; mode 3: 1200 ; mode 4: 1500***/
 int32_t max_available_mode = 3;
 int32_t smooth_interval_jump_time = 500;         /*** Variable for setting mode to mode interval time ***/
 int32_t stand_and_dont_move_start_time = 6000;   /*** Variable for setting hold time in start area ***/
@@ -167,7 +167,7 @@ void pit3_system_loop(void){
                 
         /****** ccd dubug ******/
         if(ccd_debug_print_all_message_flag == 1){ // print out all ccd message to UART
-          temp_ccd_output_debug_message_function();  
+          output_algorithm_message_to_UART();  
         }
         
         if(ccd_print_flag == 1){                   // print out 250 pixle raw data 
@@ -495,8 +495,4 @@ void pit3_system_loop(void){
     
     PIT_Flag_Clear(PIT3);
     EnableInterrupts;
-}
-
-void temp_ccd_output_debug_message_function(){
-  output_algorithm_message();
 }
