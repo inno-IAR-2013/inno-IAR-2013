@@ -192,8 +192,8 @@ void ccd_recongize_left_right_edge_and_return_dir_error(char array[]){
   /* ||||--------------------------------|||| */
   if(detect_left_flag == 1 && detect_right_flag == 1){
     current_mid_error_pos = (current_1st_left_edge + current_1st_right_edge) / 2;
-    left_start_length = current_mid_error_pos - current_1st_left_edge;
-    right_start_length = current_mid_error_pos + current_1st_right_edge;
+    //left_start_length = current_mid_error_pos - current_1st_left_edge;
+    //right_start_length = current_mid_error_pos + current_1st_right_edge;
   }
   
   /* ||||--------------------------------||||  
