@@ -8,20 +8,20 @@ int ccd_debug_print_all_message_flag=0;        // 0: off, 1: on
 int ccd_print_flag=0;                          // 0: off, 1: on
 int ccd_compressed_print_flag=0;               // 0: off, 1: on
 /*********** startup PID values ************/
-int32_t speed_array[5]                = {300           , 600         , 900          , 1200    , 1500};
-int32_t balance_kp_array[5]           = {2684746       , 2920000     , 2725000      , 2781250 , 0}; // 1200 speed can try 2977450
-int32_t balance_kd_array[5]           = {90160         , 107560      , 119160       , 119614  , 0}; // 1200 speed can try 128100
-int32_t balance_offset_array[5]       = {1188          , 1188        , 1200         , 1200    , 0};
-int32_t speed_kp_array[5]             = {350000        , 297000      , 297000       , 297000  , 0};
-int32_t speed_ki_array[5]             = {10000         , 53000       , 53000        , 53000   , 0};  // mode 0 : 49500, mode 3 : 60000
-int32_t turn_kp_array[5]              = {650000        , 650000      , 500000       , 31000   , 0};  // 愈細 = 遲入灣 ; 愈大 = 早入灣 , speed 600 : 120500 - speed 900 can try : 49850 ~ 50000 - speed 900: 98800 - speed 1200 can try 36825
+int32_t speed_array[5]                = {300           , 600         , 900          , 1200    , 0};
+int32_t balance_kp_array[5]           = {2684746       , 2880000     , 2725000      , 2781250 , 2684746}; // 1200 speed can try 2977450
+int32_t balance_kd_array[5]           = {90160         , 107560      , 119160       , 119614  , 90160}; // 1200 speed can try 128100
+int32_t balance_offset_array[5]       = {1180          , 1180        , 1200         , 1200    , 1180};
+int32_t speed_kp_array[5]             = {350000        , 297000      , 297000       , 297000  , 350000};
+int32_t speed_ki_array[5]             = {10000         , 53000       , 53000        , 53000   , 10000};  // mode 0 : 49500, mode 3 : 60000
+int32_t turn_kp_array[5]              = {650000        , 650000      , 500000       , 31000   , 650000};  // 愈細 = 遲入灣 ; 愈大 = 早入灣 , speed 600 : 120500 - speed 900 can try : 49850 ~ 50000 - speed 900: 98800 - speed 1200 can try 36825
 int32_t turn_kd_array[5]              = {0             , 0           , 18500        , 11250   , 0}; 
 int32_t turn_offset_array[5]          = {0             , 850         , 850          , 850     , 0};  // 愈細 = 中心線靠右 ; 愈大 = 中心線靠左  
-float atan_multiply_value_array[5]    = {0.01           , 0.0909808027, 0.00892080279, 0.015015, 0};  // speed 900 can try : 0.00858080279 (larger seems better) - speed 1200 can try 0.01
-int32_t left_start_length_array[5]    = {110           , 110         , 25           , 25      , 0};    
-int32_t right_start_length_array[5]   = {110           , 110         , 25           , 25      , 0};    
+float atan_multiply_value_array[5]    = {0.01          , 0.0909808027, 0.00892080279, 0.015015, 0.01};  // speed 900 can try : 0.00858080279 (larger seems better) - speed 1200 can try 0.01
+int32_t left_start_length_array[5]    = {110           , 110         , 25           , 25      , 110};    
+int32_t right_start_length_array[5]   = {110           , 110         , 25           , 25      , 110};    
 int32_t ccd_mid_pos_array[5]          = {121           , 121         , 121          , 121     , 121};
-int32_t run_speed_mode = 0;         /*** vaild input : 0 - 4; Refer mode 0: 300 ; mode 1: 600 ; mode 2: 900 ; mode 3: 1200 ; mode 4: 1500***/
+int32_t run_speed_mode = 1;         /*** vaild input : 0 - 4; Refer mode 0: 300 ; mode 1: 600 ; mode 2: 900 ; mode 3: 1200 ; mode 4: 1500***/
 int32_t max_available_mode = 3;
 int32_t smooth_interval_jump_time = 500;         /*** Variable for setting mode to mode interval time ***/
 int32_t stand_and_dont_move_start_time = 6000;   /*** Variable for setting hold time in start area ***/
@@ -454,7 +454,7 @@ void pit3_system_loop(void){
       track_reset_end_time_counter++;
     }
     
-    if(track_reset_end_time_counter == 250){
+    if(track_reset_end_time_counter == 2000){
       end_of_track_wait_flag = 0;
       this_lap_time_is_count_flag = 0;
     }
@@ -463,8 +463,13 @@ void pit3_system_loop(void){
       track_end_time_counter++;
     }
     
-    if (track_end_time_counter == 1200){
-       end_of_track_flag = 1;
+    if (track_end_time_counter == 2000){
+       //end_of_track_flag = 1;
+      run_speed_mode = 0; 
+    }
+    
+     if (track_end_time_counter == 4000){
+      run_speed_mode = 4; 
     }
     
     PIT_Flag_Clear(PIT3);
