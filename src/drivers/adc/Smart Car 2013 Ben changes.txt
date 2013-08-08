@@ -1,0 +1,5 @@
+add three adc functions:
+
+1. find the max value
+2. find the min value
+3. find the value that (max - min) 

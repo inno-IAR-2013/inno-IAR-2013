@@ -9,7 +9,7 @@
  * 作者         ：
  * 淘寶店       ：http://firestm32.taobao.com
  * 技術支持論壇 ：http://www.ourdev.cn/bbs/bbs_list.jsp?bbs_id=1008
-**********************************************************************************/
+**********************************************************************************/	
 
 #include "common.h"
 #include "adc.h"
@@ -194,73 +194,6 @@ u16 ad_ave(ADCn adcn,ADC_Ch ch,ADC_nbit bit,u8 N) //均值濾波
     tmp = tmp / N;
     return (u16)tmp;
 }
-
-
-
-u16 ad_max(ADCn adcn,ADC_Ch ch,ADC_nbit bit,u8 N) //find the max value
-{
-    u16 tmp=0;
-    u16 j[256];
-    u8  i;
-
-    ASSERT( ((adcn == ADC0) && (ch>=AD8 && ch<=AD18)) || ((adcn == ADC1)&& (ch>=AD4a && ch<=AD17)) ) ;
-
-    for(i = 0; i < N; i++)
-    {
-      j[i]= ad_once(adcn,ch,bit);
-      if(j[i]>tmp)
-      {tmp=j[i];}
-    }
-
-
-     return (u16)tmp;
-}
-
-u16 ad_min(ADCn adcn,ADC_Ch ch,ADC_nbit bit,u8 N)   //find the min value
-{
-    u16 tmp=65535;
-    u16 j[256];
-    u8  i;
-
-    ASSERT( ((adcn == ADC0) && (ch>=AD8 && ch<=AD18)) || ((adcn == ADC1)&& (ch>=AD4a && ch<=AD17)) ) ;
-
-    for(i = 0; i < N; i++)
-    {
-      j[i]= ad_once(adcn,ch,bit);
-      if(j[i]<tmp)
-      {tmp=j[i];}
-    }
-
-
-     return (u16)tmp;
-
-}
-
-
-u16 ad_axin(ADCn adcn,ADC_Ch ch,ADC_nbit bit,u8 N)  //the max value minus min value
-{
-    u16 tmp=0;
-    u16 tmp1=0;
-    u16 tmp2=65535;
-    u16 j[256];
-    u8  i;
-
-    ASSERT( ((adcn == ADC0) && (ch>=AD8 && ch<=AD18)) || ((adcn == ADC1)&& (ch>=AD4a && ch<=AD17)) ) ;
-
-    for(i = 0; i < N; i++)
-    {
-      j[i]= ad_once(adcn,ch,bit);
-      if(j[i]<tmp2)
-      {tmp2=j[i];}
-      if(j[i]>tmp1)
-      {tmp1=j[i];}
-    }
-
-     tmp=tmp1-tmp2;
-     return (u16)tmp;
-
-}
-
 
 /*************************************************************************
 *                             野火嵌入式開發工作室

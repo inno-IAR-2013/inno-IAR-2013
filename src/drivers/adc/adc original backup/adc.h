@@ -9,7 +9,7 @@
  * §@ªÌ         ¡G³¥¤õ´O¤J¦¡¶}µo¤u§@«Ç
  * ²^Ä_©±       ¡Ghttp://firestm32.taobao.com
  * §Þ³N¤ä«ù½×¾Â ¡Ghttp://www.ourdev.cn/bbs/bbs_list.jsp?bbs_id=1008
-**********************************************************************************/
+**********************************************************************************/	
 
 
 
@@ -63,7 +63,7 @@ typedef enum ADC_Ch
   AD19=19,  //	    ADC0_DM0				                    ADC1_DM0
   AD20=20,  //	    ADC0_DM1				                    ADC1_DM1
   AD21=21,  //				        	                        «O¯d
-  AD22=22,  //
+  AD22=22,  //				
   AD23=23,  //	    DAC0_OUT(12-bit) -- DAC0_OUT		        DAC1_OUT(12-bit)
   AD24=24,  //	    «O¯d					«O¯d
   AD25=25,  //	    «O¯d					«O¯d
@@ -91,9 +91,6 @@ extern u16      ad_once   (ADCn,ADC_Ch,ADC_nbit);      //ªö¶°¤@¦¸¤@¸ô¼ÒÀÀ¶qªºAD­
 
 extern u16      ad_mid    (ADCn,ADC_Ch,ADC_nbit);      //¤¤­ÈÂoªi«áªºµ²ªG
 extern u16      ad_ave    (ADCn,ADC_Ch,ADC_nbit,u8 N); //§¡­ÈÂoªi«áªºµ²ªG
-extern u16      ad_max    (ADCn,ADC_Ch,ADC_nbit,u8 N);  //the max value
-extern u16      ad_min    (ADCn,ADC_Ch,ADC_nbit,u8 N);   //the min value
-extern u16      ad_axin    (ADCn,ADC_Ch,ADC_nbit,u8 N);  // max minus min value
 
 extern void     adc_start (ADCn,ADC_Ch,ADC_nbit);      //¶}©ladcÂà´«
 extern void     adc_stop  (ADCn);                      //°±¤îADCÂà´«
