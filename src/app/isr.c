@@ -14,10 +14,10 @@ int32_t balance_kd_array[5]           = {90160         , 107560      , 119160   
 int32_t balance_offset_array[5]       = {1180          , 1180        , 1200         , 1200    , 1180};
 int32_t speed_kp_array[5]             = {350000        , 297000      , 297000       , 297000  , 350000};
 int32_t speed_ki_array[5]             = {10000         , 53000       , 53000        , 53000   , 10000};  // mode 0 : 49500, mode 3 : 60000
-int32_t turn_kp_array[5]              = {650000        , 650000      , 500000       , 31000   , 650000};  // 愈細 = 遲入灣 ; 愈大 = 早入灣 , speed 600 : 120500 - speed 900 can try : 49850 ~ 50000 - speed 900: 98800 - speed 1200 can try 36825
+int32_t turn_kp_array[5]              = {650000        , 635000      , 500000       , 31000   , 650000};  // 愈細 = 遲入灣 ; 愈大 = 早入灣 , speed 600 : 120500 - speed 900 can try : 49850 ~ 50000 - speed 900: 98800 - speed 1200 can try 36825
 int32_t turn_kd_array[5]              = {0             , 0           , 18500        , 11250   , 0}; 
 int32_t turn_offset_array[5]          = {0             , 850         , 850          , 850     , 0};  // 愈細 = 中心線靠右 ; 愈大 = 中心線靠左  
-float atan_multiply_value_array[5]    = {0.01          , 0.0909808027, 0.00892080279, 0.015015, 0.01};  // speed 900 can try : 0.00858080279 (larger seems better) - speed 1200 can try 0.01
+float atan_multiply_value_array[5]    = {0.01          , 0.01        , 0.00892080279, 0.015015, 0.01};  // speed 900 can try : 0.00858080279 (larger seems better) - speed 1200 can try 0.01
 int32_t left_start_length_array[5]    = {110           , 110         , 25           , 25      , 110};    
 int32_t right_start_length_array[5]   = {110           , 110         , 25           , 25      , 110};    
 int32_t ccd_mid_pos_array[5]          = {121           , 121         , 121          , 121     , 121};
