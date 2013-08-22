@@ -43,12 +43,10 @@ void motor_init(void);
 
 void main()
 {   
-
   uart_init(UART3, 115200); // For our flashed bluetooth
   //uart_init(UART3, 9600); // For our non-flashed bluetooth
   gpio_init(PORTE,6,GPI,0); // SW2 goes into gyro calibration mode
-  
-  
+    
   printf("\nWelcome to the SmartCar 2013 Sensor team developement system\n");
   while(1){
     
@@ -65,29 +63,31 @@ void main()
    
    if(gpio_get(PORTE,6)==0){
      
-     adc_init(ADC1,AD5b);
-     adc_init(ADC1,AD7b);
-        
-     printf("We are now in gyro calibration mode, Please keep car stationery and wait till light dies");
-     gpio_init(PORTE,24,GPO,0);
-     gpio_init(PORTE,25,GPO,0);
-     gpio_init(PORTE,26,GPO,0);
-     gpio_init(PORTE,27,GPO,0);
+       adc_init(ADC1,AD5b);
+       adc_init(ADC1,AD7b);
+          
+       printf("We are now in gyro calibration mode, Please keep car stationery and wait till light dies");
+       gpio_init(PORTE,24,GPO,0);
+       gpio_init(PORTE,25,GPO,0);
+       gpio_init(PORTE,26,GPO,0);
+       gpio_init(PORTE,27,GPO,0);
+       
+       delayms(3000);
+       
+       turn_gyro_offset=ad_ave(ADC1,AD5b,ADC_12bit,10000);
+       balance_gyro_offset=ad_ave(ADC1,AD7b,ADC_12bit,10000);
+       
+       store_u32_to_flashmem1(turn_gyro_offset);
+       store_u32_to_flashmem2(balance_gyro_offset);
+       
+       gpio_turn(PORTE,24);
+       gpio_turn(PORTE,25);
+       gpio_turn(PORTE,26);
+       gpio_turn(PORTE,27);
      
-     delayms(3000);
+     while(1){
      
-     turn_gyro_offset=ad_ave(ADC1,AD5b,ADC_12bit,10000);
-     balance_gyro_offset=ad_ave(ADC1,AD7b,ADC_12bit,10000);
-     
-     store_u32_to_flashmem1(turn_gyro_offset);
-     store_u32_to_flashmem2(balance_gyro_offset);
-     
-     gpio_turn(PORTE,24);
-     gpio_turn(PORTE,25);
-     gpio_turn(PORTE,26);
-     gpio_turn(PORTE,27);
-     
-     while(1){}
+     }
      
    }
    
@@ -153,11 +153,8 @@ void main()
         store_u32_to_flashmem2(1019);
         
         printf("Now reading from memory\n");
-        printf("Memory 1:%d\n",get_u32_from_flashmem1());
-        
+        printf("Memory 1:%d\n",get_u32_from_flashmem1());        
         printf("Memory 2:%d\n",get_u32_from_flashmem2());
-        
-        
        
         while(1)
         { 
@@ -171,8 +168,7 @@ void main()
              
         DisableInterrupts;
         exti_init(PORTA,6,rising_up);    //inits left encoder interrupt capture
-        exti_init(PORTA,7,rising_up);    //inits right encoder interrupt capture
-             
+        exti_init(PORTA,7,rising_up);    //inits right encoder interrupt capture             
         pit_init_ms(PIT1,500);                 //periodic interrupt every 500ms
      
         EnableInterrupts;
@@ -202,8 +198,6 @@ void main()
           
           printf("\n\f Input direction : 0 or 1");
           motor_test = uart_getchar(UART3)-48;
-         
-          
           
           if (motor_test){
             gpio_set(PORTD,9,1);
@@ -211,8 +205,7 @@ void main()
           }else{
             gpio_set(PORTD,9,0);
             gpio_set(PORTD,1,0);//this is DIR
-          }
-          
+          }          
         }  
       break;
 
@@ -229,8 +222,7 @@ void main()
         turn_gyro_offset=get_u32_from_flashmem1();
         balance_gyro_offset=get_u32_from_flashmem2();
         
-        motor_init();
-        
+        motor_init();        
         gpio_set(PORTD,9,0); //dir
         gpio_set(PORTD,7,0); //dir
         
@@ -241,7 +233,6 @@ void main()
         pit_init_ms(PIT3,1);
         
         printf("\nEverything inited alright");
-        
         
         while(1){
           //system loop runs 
@@ -274,10 +265,8 @@ void ccd_all_pin_init(){
    gpio_init(PORTE,8,GPI,0); // SW4
    gpio_init(PORTE,9,GPI,0); // SW5
    
-   LED_init(); // To test ccd sampling function is operating
-   
-   light_sensor_init();
-   
+   LED_init(); // To test ccd sampling function is operating   
+   light_sensor_init();   
    gpio_set(PORTE,26,0); // defatul speed mode = 0
 } 
 

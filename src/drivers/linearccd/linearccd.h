@@ -9,6 +9,9 @@ Edited & compiled by John Ching
 
 *******************************************/
 
+#ifndef _LINEARCCD_H_
+#define _LINEARCCD_H_
+
 /*********** CCD basic library ************/
 void ccd_sampling(char array[], int state);
 // ccd main loop
@@ -53,3 +56,5 @@ void ccd_recongize_left_right_edge_and_return_dir_error(char array[]);
 
 void calculate_two_edge_middle_distance(char array[]);
 // return edge distance
+
+#endif  _LINEARCCD_H_
