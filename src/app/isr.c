@@ -2,12 +2,14 @@
 #include "include.h"
 #include "linearccd.h"
 #include <inttypes.h>
+#include <math.h>
 
 /*********** system debug mode/flag ************/
 int ccd_debug_print_all_message_flag=0;        // 0: off, 1: on
 int ccd_print_flag=0;                          // 0: off, 1: on
 int ccd_compressed_print_flag=0;               // 0: off, 1: on
 int pid_mode=0;                                // 0: All, 1: Balance only
+int left_cycle_pwm;
 /*********** startup PID values ************/
 int32_t speed_array[5]                = {300         , 600       , 900     , 1200    , 0};
 int32_t balance_kp_array[5]           = {2684746     , 2880000   , 2725000 , 2781250 , 2684746}; // 1200 speed can try 2977450
@@ -23,10 +25,12 @@ float atan_multiply_value_array[5]    = {0.01        , 0.01      , 0.01    , 0.0
 int32_t left_start_length_array[5]    = {105         , 105       , 25      , 25      , 110};    
 int32_t right_start_length_array[5]   = {105         , 105       , 25      , 25      , 110};    
 int32_t ccd_mid_pos_array[5]          = {121         , 121       , 121     , 121     , 121};
-int32_t run_speed_mode = 0;         /*** vaild input : 0 - 4; Refer mode 0: 300 ; mode 1: 600 ; mode 2: 900 ; mode 3: 1200 ; mode 4: 1500***/
+int32_t run_speed_mode = 1;         /*** vaild input : 0 - 4; Refer mode 0: 300 ; mode 1: 600 ; mode 2: 900 ; mode 3: 1200 ; mode 4: 1500***/
 int32_t max_available_mode = 3;
 int32_t smooth_interval_jump_time = 500;         /*** Variable for setting mode to mode interval time ***/
 int32_t stand_and_dont_move_start_time = 6000;   /*** Variable for setting hold time in start area ***/
+
+
 
 /*********** initialize balance PID ************/
 int32_t balance_kp = 0;
@@ -108,6 +112,18 @@ int end_hold_time=500;
 int this_lap_time_is_count_flag=0;
 int track_reset_end_time_counter=0;
 
+KF acc_kf = {0.0005, 50, 0, 0, 0, 1, 0};
+u32 kf_counter = 0;
+
+void acc_kalman_filtering(void){
+		kalman_state_predict(&acc_kf);
+		kalman_covariance_predict(&acc_kf); 
+		kalman_gain(&acc_kf);			 	 
+		kalman_state_update(&acc_kf, control_tilt);  	
+		kalman_covariance_update(&acc_kf);  
+		control_tilt = (int32_t)floor(acc_kf.X);		  	
+}
+
 /****** main system control loop, runs every 1ms, each case runs every 3 ms ******/
 void pit3_system_loop(void){
   DisableInterrupts;   
@@ -156,6 +172,16 @@ void pit3_system_loop(void){
     case 1:
                                                 
       control_tilt=(ad_ave(ADC1,AD6b,ADC_12bit,20)-balance_offset); // offset
+      //printf("%ld before:",control_tilt);
+      if(kf_counter > 5000){
+        //acc_kalman_filtering();
+      } else{
+        kf_counter++;
+        acc_kf.x = control_tilt;
+        acc_kf.X = control_tilt;
+      }
+      //printf("%ld after:",control_tilt);
+      
       control_omg=ad_ave(ADC1,AD7b,ADC_12bit,20)-1940;
       motor_command_balance= ((control_tilt)*balance_kp/balance_kp_out_of) - ((control_omg)*balance_kd/balance_kd_out_of);
       
