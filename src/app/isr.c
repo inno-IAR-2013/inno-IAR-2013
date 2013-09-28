@@ -9,28 +9,25 @@ int ccd_debug_print_all_message_flag=0;        // 0: off, 1: on
 int ccd_print_flag=0;                          // 0: off, 1: on
 int ccd_compressed_print_flag=0;               // 0: off, 1: on
 int pid_mode=0;                                // 0: All, 1: Balance only
-int left_cycle_pwm;
 /*********** startup PID values ************/
-int32_t speed_array[5]                = {300         , 600       , 900     , 1200    , 0};
-int32_t balance_kp_array[5]           = {2684746     , 2880000   , 2725000 , 2781250 , 2684746}; // 1200 speed can try 2977450
-int32_t balance_kd_array[5]           = {110160       , 130160    , 119160  , 119614  , 90160}; // 1200 speed can try 128100
-int32_t balance_offset_array[5]       = {1180        , 1180      , 1200    , 1200    , 1180};
+int32_t speed_array[6]                = {300         , 600       , 900     , 1200    , 0       ,-300};
+int32_t balance_kp_array[6]           = {2684746     , 2880000   , 2725000 , 2781250 , 2684746 ,2684746}; // 1200 speed can try 2977450
+int32_t balance_kd_array[6]           = {110160      , 130160    , 119160  , 119614  , 90160   ,110160}; // 1200 speed can try 128100
+int32_t balance_offset_array[6]       = {1180        , 1180      , 1200    , 1200    , 1180    ,1180};
 int32_t balance_offset = 1200;
-int32_t speed_kp_array[5]             = {350000      , 297000    , 297000  , 297000  , 350000};
-int32_t speed_ki_array[5]             = {10000       , 53000     , 53000   , 53000   , 10000};  // mode 0 : 49500, mode 3 : 60000
-int32_t turn_kp_array[5]              = {635000      , 635000    , 500000  , 31000   , 650000}; // 愈細 = 遲入灣 ; 愈大 = 早入灣 , speed 600 : 120500 - speed 900 can try : 49850 ~ 50000 - speed 900: 98800 - speed 1200 can try 36825
-int32_t turn_kd_array[5]              = {0           , 0         , 18500   , 11250   , 0}; 
-int32_t turn_offset_array[5]          = {0           , 850       , 850     , 850     , 0};      // 愈細 = 中心線靠右 ; 愈大 = 中心線靠左  
-float atan_multiply_value_array[5]    = {0.01        , 0.01      , 0.01    , 0.01    , 0.01};   // speed 900 can try : 0.00858080279 (larger seems better) - speed 1200 can try 0.01
-int32_t left_start_length_array[5]    = {105         , 105       , 25      , 25      , 110};    
-int32_t right_start_length_array[5]   = {105         , 105       , 25      , 25      , 110};    
-int32_t ccd_mid_pos_array[5]          = {121         , 121       , 121     , 121     , 121};
-int32_t run_speed_mode = 1;         /*** vaild input : 0 - 4; Refer mode 0: 300 ; mode 1: 600 ; mode 2: 900 ; mode 3: 1200 ; mode 4: 1500***/
-int32_t max_available_mode = 3;
+int32_t speed_kp_array[6]             = {350000      , 297000    , 297000  , 297000  , 350000  ,350000};
+int32_t speed_ki_array[6]             = {10000       , 53000     , 53000   , 53000   , 10000   ,10000};  // mode 0 : 49500, mode 3 : 60000
+int32_t turn_kp_array[6]              = {635000      , 635000    , 500000  , 31000   , 650000  ,635000}; // 愈細 = 遲入灣 ; 愈大 = 早入灣 , speed 600 : 120500 - speed 900 can try : 49850 ~ 50000 - speed 900: 98800 - speed 1200 can try 36825
+int32_t turn_kd_array[6]              = {0           , 0         , 18500   , 11250   , 0       ,0}; 
+int32_t turn_offset_array[6]          = {0           , 850       , 850     , 850     , 0       ,0};      // 愈細 = 中心線靠右 ; 愈大 = 中心線靠左  
+float atan_multiply_value_array[6]    = {0.01        , 0.01      , 0.01    , 0.01    , 0.01    ,0.01};   // speed 900 can try : 0.00858080279 (larger seems better) - speed 1200 can try 0.01
+int32_t left_start_length_array[6]    = {105         , 105       , 25      , 25      , 110     ,105};    
+int32_t right_start_length_array[6]   = {105         , 105       , 25      , 25      , 110     ,105};    
+int32_t ccd_mid_pos_array[6]          = {121         , 121       , 121     , 121     , 121     ,121};
+int32_t run_speed_mode = 0;         /*** vaild input : 0 - 4; Refer mode 0: 300 ; mode 1: 600 ; mode 2: 900 ; mode 3: 1200 ; mode 4: 1500***/
+int32_t max_available_mode = 6;
 int32_t smooth_interval_jump_time = 500;         /*** Variable for setting mode to mode interval time ***/
 int32_t stand_and_dont_move_start_time = 6000;   /*** Variable for setting hold time in start area ***/
-
-
 
 /*********** initialize balance PID ************/
 int32_t balance_kp = 0;
@@ -111,6 +108,11 @@ int pre_set_lap_time=1;
 int end_hold_time=500;
 int this_lap_time_is_count_flag=0;
 int track_reset_end_time_counter=0;
+/************* Challenge Cup Demo Variable *************/
+u32 econder_integral = 0;
+int turn_state = 0;
+u16 encoder_turn_state_integral = 0;
+u32 end_of_track_turn_time =0;
 
 KF acc_kf = {0.0005, 50, 0, 0, 0, 1, 0};
 u32 kf_counter = 0;
@@ -154,17 +156,28 @@ void pit3_system_loop(void){
           ccd_compressed_print(g_char_ar_ccd_current_pixel);
         }        
       }
-      
+      /*
+      if(system_loop_tick % 10 == 0){
+        motor_turn_left = 2500;
+      }
+      else {
+        motor_turn_left = 0;
+      }
+      */
       if(motor_pid_counter<33){
         // do nth
         }else{
-        //motor_command_turn_delta = ((current_dir_arc_value_error)* turn_kp/turn_kp_out_of + gyro_turn * turn_kd/turn_kd_out_of - motor_turn_left)/33;
+       //motor_command_turn_delta = ((current_dir_arc_value_error)* turn_kp/turn_kp_out_of + gyro_turn * turn_kd/turn_kd_out_of - motor_turn_left)/33;
          motor_command_turn_delta = ((current_dir_error * turn_kp)/turn_kp_out_of - motor_turn_left)/33; 
       }
-
-      motor_turn_left+=motor_command_turn_delta;
-      motor_turn_right-=motor_command_turn_delta;
+      
+      //motor_turn_left+=(motor_command_turn_delta);
+      //motor_turn_right-=motor_command_turn_delta;
      
+      motor_turn_left+=(motor_command_turn_delta);
+      motor_turn_right+=motor_command_turn_delta;
+     
+      
     system_mode=1;
     break;
     
@@ -198,6 +211,9 @@ void pit3_system_loop(void){
           
           /****** stuff here happens every 33*3ms=99ms, used for calculating and capturing encoder motor PID ******/          
           car_speed=g_u32encoder_lf+g_u32encoder_rt;
+          econder_integral = econder_integral + g_u32encoder_rt;
+          //printf("econder_integral:%d",econder_integral);
+          
           encoder_turn_error+=g_u32encoder_rt-g_u32encoder_lf;  
           
          /************ clears current encoder ************/
@@ -427,7 +443,13 @@ void pit3_system_loop(void){
        gpio_set(PORTE,26,0);          
     } 
 
-   
+    if(econder_integral >= 250000){
+      end_of_track_wait_flag = 1;
+      econder_integral = 0;
+      //printf("**econder_integral**:%d",econder_integral);
+      //printf("**end_of_track_wait_flag = 1**");
+    }
+    
     /*** 20000ms trigger end track detection by light sensor ***/
     if( system_loop_tick >= (mode_selection_start_time_end+18000)){ 
       if(gpio_get(PORTB, 21) == 1 && gpio_get(PORTB, 22) == 0 && gpio_get(PORTB, 23) == 1){
@@ -442,6 +464,8 @@ void pit3_system_loop(void){
         this_lap_time_is_count_flag = 1;
       }
       track_reset_end_time_counter++;
+    } else if (end_of_track_wait_flag == 0){
+      run_speed_mode = 0;
     }
     
     /*** reset and unlock the previous policy, able to count next lap ***/
@@ -464,6 +488,28 @@ void pit3_system_loop(void){
      if (track_end_time_counter == (end_hold_time*2)){
       run_speed_mode = 4; // Then no spped and just stand
     }
+    
+    if(end_of_track_wait_flag == 1){
+     turn_state = 1;
+     motor_turn_left = 300; 
+     end_of_track_turn_time++;
+     encoder_turn_state_integral = encoder_turn_state_integral + g_u32encoder_rt;
+    }
+    /*
+    if(end_of_track_turn_time >= 5000){
+      end_of_track_wait_flag = 0;
+      motor_turn_left = 0;
+      end_of_track_turn_time = 0;
+    }*/
+    
+    /*
+    if( encoder_turn_state_integral >= 1650){
+      encoder_turn_state_integral = 0;
+      turn_state = 0;
+      end_of_track_wait_flag = 0;
+      motor_turn_left = 0;
+      run_speed_mode = 0;
+    }*/
     
     PIT_Flag_Clear(PIT3);
     EnableInterrupts;
