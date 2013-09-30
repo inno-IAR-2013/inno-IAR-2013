@@ -114,7 +114,7 @@ int turn_state = 0;
 u16 encoder_turn_state_integral = 0;
 u32 end_of_track_turn_time =0;
 int mode_2_end_flag = 0;
-int demo_mode = 1; /* mode 1: circular rotate, mode 2: straight line loop */
+int demo_mode = 2; /* mode 1: circular rotate, mode 2: straight line loop */
 
 KF acc_kf = {0.0005, 50, 0, 0, 0, 1, 0};
 u32 kf_counter = 0;
@@ -158,14 +158,7 @@ void pit3_system_loop(void){
           ccd_compressed_print(g_char_ar_ccd_current_pixel);
         }        
       }
-      /*
-      if(system_loop_tick % 10 == 0){
-        motor_turn_left = 2500;
-      }
-      else {
-        motor_turn_left = 0;
-      }
-      */
+      
       if(motor_pid_counter<33){
         // do nth
         }else{
@@ -335,13 +328,13 @@ void pit3_system_loop(void){
     }
     
  
-    if( system_loop_tick <= (mode_selection_start_time_end + stand_and_dont_move_start_time - 4000)){ 
-          if (gpio_get(PORTE, 9) == 0){        // when 1 press
-            demo_mode = 1;
-          } else if (gpio_get(PORTE, 6) == 0){ // when 4 press
-            demo_mode = 2;
-          }
+    //if( system_loop_tick <= (mode_selection_start_time_end + stand_and_dont_move_start_time - 4000)){ 
+    if (gpio_get(PORTE, 9) == 0){        // when 1 press
+        demo_mode = 1;
+    } else if (gpio_get(PORTE, 6) == 0){ // when 4 press
+        demo_mode = 2;
     }
+    
     
    /*** (6000 + 1000 + 500 * mode ) ms ***/    
    if( system_loop_tick == (stand_and_dont_move_start_time + mode_selection_start_time_end + (smooth_interval_jump_time * startup_smooth_counter))){ 
@@ -353,7 +346,6 @@ void pit3_system_loop(void){
           /*** balance ***/
           balance_kp = balance_kp_array[startup_smooth_counter];      
           balance_kd = balance_kd_array[startup_smooth_counter];
-          //balance_offset = balance_offset_array[startup_smooth_counter];
             
           /*** speed ***/
           speed_kp =  speed_kp_array[startup_smooth_counter];    
@@ -365,7 +357,6 @@ void pit3_system_loop(void){
           turn_offset = turn_offset_array[startup_smooth_counter];
             
           /*** vehicle respect to track position ***/
-          
           startup_smooth_counter = startup_smooth_counter + 1;
           system_already_startup = 1;
         }
@@ -396,7 +387,6 @@ void pit3_system_loop(void){
             left_start_length = left_start_length_array[run_speed_mode];
             right_start_length = right_start_length_array[run_speed_mode];
             ccd_mid_pos = ccd_mid_pos_array[run_speed_mode];
-            //atan_multiply_value = atan_multiply_value_array[run_speed_mode];
      }
    }
    
@@ -417,6 +407,15 @@ void pit3_system_loop(void){
        gpio_set(PORTE,24,0);
        gpio_set(PORTE,25,1);
        gpio_set(PORTE,26,0);          
+    } 
+    
+   /*** challenge cup demo mode notification by LED***/
+    if(demo_mode == 1){
+       gpio_set(PORTE,27,0); 
+    } else if(demo_mode == 2){
+      if(system_loop_tick % 50 == 0){
+       gpio_turn(PORTE,27); 
+      }
     } 
     
     if(demo_mode == 1){
