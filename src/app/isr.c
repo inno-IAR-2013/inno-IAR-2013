@@ -25,7 +25,7 @@ int32_t left_start_length_array[6]    = {105         , 105       , 25      , 25 
 int32_t right_start_length_array[6]   = {105         , 105       , 25      , 25      , 110     ,105};    
 int32_t ccd_mid_pos_array[6]          = {121         , 121       , 121     , 121     , 121     ,121};
 int32_t run_speed_mode = 0;         /*** vaild input : 0 - 4; Refer mode 0: 300 ; mode 1: 600 ; mode 2: 900 ; mode 3: 1200 ; mode 4: 1500***/
-int32_t max_available_mode = 6;
+//int32_t max_available_mode = 6;
 int32_t smooth_interval_jump_time = 500;         /*** Variable for setting mode to mode interval time ***/
 int32_t stand_and_dont_move_start_time = 6000;   /*** Variable for setting hold time in start area ***/
 
@@ -116,6 +116,8 @@ u32 end_of_track_turn_time =0;
 int mode_2_end_flag = 0;
 int demo_mode = 2; /* mode 1: circular rotate, mode 2: straight line loop */
 
+int backForthCounter =0;
+
 KF acc_kf = {0.0005, 50, 0, 0, 0, 1, 0};
 u32 kf_counter = 0;
 
@@ -161,18 +163,13 @@ void pit3_system_loop(void){
       
       if(motor_pid_counter<33){
         // do nth
-        }else{
-       //motor_command_turn_delta = ((current_dir_arc_value_error)* turn_kp/turn_kp_out_of + gyro_turn * turn_kd/turn_kd_out_of - motor_turn_left)/33;
-         motor_command_turn_delta = ((current_dir_error * turn_kp)/turn_kp_out_of - motor_turn_left)/33; 
+      }else{
+          motor_command_turn_delta = ((current_dir_error * turn_kp)/turn_kp_out_of - motor_turn_left)/33; 
       }
-      
-      //motor_turn_left+=(motor_command_turn_delta);
-      //motor_turn_right-=motor_command_turn_delta;
-     
+
       motor_turn_left+=(motor_command_turn_delta);
       motor_turn_right+=motor_command_turn_delta;
      
-      
     system_mode=1;
     break;
     
@@ -180,7 +177,6 @@ void pit3_system_loop(void){
     case 1:
                                                 
       control_tilt=(ad_ave(ADC1,AD6b,ADC_12bit,20)-balance_offset); // offset
-      //printf("%ld before:",control_tilt);
       if(kf_counter > 5000){
         //acc_kalman_filtering();
       } else{
@@ -188,11 +184,9 @@ void pit3_system_loop(void){
         acc_kf.x = control_tilt;
         acc_kf.X = control_tilt;
       }
-      //printf("%ld after:",control_tilt);
       
-      control_omg=ad_ave(ADC1,AD7b,ADC_12bit,20)-1940;
-      motor_command_balance= ((control_tilt)*balance_kp/balance_kp_out_of) - ((control_omg)*balance_kd/balance_kd_out_of);
-      
+    control_omg=ad_ave(ADC1,AD7b,ADC_12bit,20)-1940;
+    motor_command_balance= ((control_tilt)*balance_kp/balance_kp_out_of) - ((control_omg)*balance_kd/balance_kd_out_of);
     system_mode=2;
     break;
     
@@ -204,6 +198,9 @@ void pit3_system_loop(void){
         }else{
           motor_pid_counter=0;
           
+          if(demo_mode == 1){
+           motor_turn_left = 80;
+          }
           /****** stuff here happens every 33*3ms=99ms, used for calculating and capturing encoder motor PID ******/          
           car_speed=g_u32encoder_lf+g_u32encoder_rt;
           econder_integral = econder_integral + g_u32encoder_rt;
@@ -278,6 +275,7 @@ void pit3_system_loop(void){
         
     if ( system_loop_tick < mode_selection_start_time_end){ /*** Manual speed selection time , < 1000ms ***/
           
+      /*
         if (gpio_get(PORTE, 8) == 0){ // when 3 press
           if(start_up_press_flag == 0){
             run_speed_mode = run_speed_mode + 1;
@@ -287,7 +285,8 @@ void pit3_system_loop(void){
             start_up_press_flag = 1;
           }
         }
-        
+        */
+      
         if(start_up_press_flag == 1){ // lock SW button
           start_up_press_lock_counter++; 
         }
@@ -308,23 +307,23 @@ void pit3_system_loop(void){
           control_car_speed = 0;
           
           /*** balance ***/
-          balance_kp = balance_kp_array[0];      
-          balance_kd = balance_kd_array[0];
+          balance_kp = balance_kp_array[run_speed_mode];      
+          balance_kd = balance_kd_array[run_speed_mode];
           
           /*** speed ***/
-          speed_kp =  speed_kp_array[0];    
-          speed_ki =  speed_ki_array[0];
+          speed_kp =  speed_kp_array[run_speed_mode];    
+          speed_ki =  speed_ki_array[run_speed_mode];
            
           /*** turn***/
-          turn_kp = turn_kp_array[0]; 
-          turn_kd = turn_kd_array[0]; 
-          turn_offset = turn_offset_array[0];
+          turn_kp = turn_kp_array[run_speed_mode]; 
+          turn_kd = turn_kd_array[run_speed_mode]; 
+          turn_offset = turn_offset_array[run_speed_mode];
           
           /*** vehicle respect to track position ***/
-          left_start_length = left_start_length_array[0];
-          right_start_length = right_start_length_array[0];
-          ccd_mid_pos = ccd_mid_pos_array[0];
-          atan_multiply_value = atan_multiply_value_array[0];     
+          left_start_length = left_start_length_array[run_speed_mode];
+          right_start_length = right_start_length_array[run_speed_mode];
+          ccd_mid_pos = ccd_mid_pos_array[run_speed_mode];
+          //atan_multiply_value = atan_multiply_value_array[0];     
     }
     
  
@@ -361,8 +360,8 @@ void pit3_system_loop(void){
           system_already_startup = 1;
         }
       } 
-   
-   
+    
+  
    /*** dynamic update speed depends on current case & stop after finish ***/
    if(system_already_startup == 1){
      if( system_loop_tick % 250 == 0){
@@ -419,18 +418,21 @@ void pit3_system_loop(void){
     } 
     
     if(demo_mode == 1){
+      run_speed_mode = 0;
       if(econder_integral >= 250000){
         end_of_track_wait_flag = 1;
         econder_integral = 0;
-        //printf("**econder_integral**:%d",econder_integral);
-        //printf("**end_of_track_wait_flag = 1**");
+        motor_turn_left = 80;
       }
     }
     
-    /*** 20000ms trigger end track detection by light sensor ***/
-    if( system_loop_tick >= (mode_selection_start_time_end+18000)){ 
-      if(gpio_get(PORTB, 21) == 1 && gpio_get(PORTB, 22) == 0 && gpio_get(PORTB, 23) == 1){
-          end_of_track_wait_flag = 1;
+     if(demo_mode == 2){
+      if(system_loop_tick % 3000 == 0){
+        if(run_speed_mode == 0){
+          run_speed_mode =5;
+        }else if(run_speed_mode==5){
+          run_speed_mode =0;
+        }
       }
     }
     
@@ -441,9 +443,9 @@ void pit3_system_loop(void){
         this_lap_time_is_count_flag = 1;
       }
       track_reset_end_time_counter++;
-    } else if (end_of_track_wait_flag == 0){
+    } /*else if (end_of_track_wait_flag == 0){
       run_speed_mode = 0;
-    }
+    }*/
     
     /*** reset and unlock the previous policy, able to count next lap ***/
     if(track_reset_end_time_counter == 2000){
@@ -458,7 +460,6 @@ void pit3_system_loop(void){
     
     /*** stop after hold time ***/
     if (track_end_time_counter == end_hold_time){
-       //end_of_track_flag = 1;
       run_speed_mode = 0; // First down speed to 300
     }
     
@@ -468,7 +469,6 @@ void pit3_system_loop(void){
     
     if(end_of_track_wait_flag == 1){
      turn_state = 1;
-     motor_turn_left = 300; 
      end_of_track_turn_time++;
      encoder_turn_state_integral = encoder_turn_state_integral + g_u32encoder_rt;
     }
@@ -517,33 +517,3 @@ void encoder_counter(void){
         }
     }
 }
-
-    /*** adjust balance offset by SW ***
-    if( system_loop_tick <= (mode_selection_start_time_end + stand_and_dont_move_start_time - 4000)){ 
-       if(adjust_lock_counter % 10 == 0){
-          adjust_balance_offset_flag = 0;
-       }
-      
-      if(adjust_balance_offset_flag == 0){
-        if (gpio_get(PORTE, 9) == 0){        // when 1 press
-           balance_offset_array[0] = balance_offset_array[0] - 1;
-           balance_offset_array[1] = balance_offset_array[1] - 1;
-           balance_offset_array[2] = balance_offset_array[2] - 1;
-           balance_offset_array[3] = balance_offset_array[3] - 1;
-           adjust_balance_offset_flag = 1;
-           adjust_lock_counter = 0;
-        } else if (gpio_get(PORTE, 6) == 0){ // when 4 press
-           balance_offset_array[0] = balance_offset_array[0] + 1;
-           balance_offset_array[1] = balance_offset_array[1] + 1;
-           balance_offset_array[2] = balance_offset_array[2] + 1;
-           balance_offset_array[3] = balance_offset_array[3] + 1;
-           adjust_balance_offset_flag = 1;
-           adjust_lock_counter = 0;
-        }
-      }
-      adjust_lock_counter++;
-      
-      if(system_loop_tick % 50 == 0){
-          gpio_turn(PORTE,27);  
-      } 
-    }*/
