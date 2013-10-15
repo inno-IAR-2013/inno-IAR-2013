@@ -14,7 +14,7 @@ int32_t speed_array[6]                = {300         , 600       , 900     , 120
 int32_t balance_kp_array[6]           = {2684746     , 2880000   , 2725000 , 2781250 , 2684746 ,2684746}; // 1200 speed can try 2977450
 int32_t balance_kd_array[6]           = {110160      , 130160    , 119160  , 119614  , 90160   ,110160}; // 1200 speed can try 128100
 int32_t balance_offset_array[6]       = {1180        , 1180      , 1200    , 1200    , 1180    ,1180};
-int32_t balance_offset = 1200;
+int32_t balance_offset = 1350;
 int32_t speed_kp_array[6]             = {350000      , 297000    , 297000  , 297000  , 350000  ,350000};
 int32_t speed_ki_array[6]             = {10000       , 53000     , 53000   , 53000   , 10000   ,10000};  // mode 0 : 49500, mode 3 : 60000
 int32_t turn_kp_array[6]              = {635000      , 635000    , 500000  , 31000   , 650000  ,635000}; // 愈細 = 遲入灣 ; 愈大 = 早入灣 , speed 600 : 120500 - speed 900 can try : 49850 ~ 50000 - speed 900: 98800 - speed 1200 can try 36825
@@ -332,6 +332,8 @@ void pit3_system_loop(void){
         demo_mode = 1;
     } else if (gpio_get(PORTE, 6) == 0){ // when 4 press
         demo_mode = 2;
+    } else if (gpio_get(PORTE,8) == 0){
+        run_speed_mode = 4;
     }
     
     
@@ -427,7 +429,7 @@ void pit3_system_loop(void){
     }
     
      if(demo_mode == 2){
-      if(system_loop_tick % 3000 == 0){
+      if(system_loop_tick % 1500 == 0){
         if(run_speed_mode == 0){
           run_speed_mode =5;
         }else if(run_speed_mode==5){
