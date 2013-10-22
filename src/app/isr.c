@@ -14,7 +14,7 @@ int32_t speed_array[6]                = {300         , 600       , 900     , 120
 int32_t balance_kp_array[6]           = {2684746     , 2880000   , 2725000 , 2781250 , 2684746 ,2684746}; // 1200 speed can try 2977450
 int32_t balance_kd_array[6]           = {110160      , 130160    , 119160  , 119614  , 90160   ,110160}; // 1200 speed can try 128100
 int32_t balance_offset_array[6]       = {1180        , 1180      , 1200    , 1200    , 1180    ,1180};
-int32_t balance_offset = 1350;
+int32_t balance_offset = 1200;
 int32_t speed_kp_array[6]             = {350000      , 297000    , 297000  , 297000  , 350000  ,350000};
 int32_t speed_ki_array[6]             = {10000       , 53000     , 53000   , 53000   , 10000   ,10000};  // mode 0 : 49500, mode 3 : 60000
 int32_t turn_kp_array[6]              = {635000      , 635000    , 500000  , 31000   , 650000  ,635000}; // 愈細 = 遲入灣 ; 愈大 = 早入灣 , speed 600 : 120500 - speed 900 can try : 49850 ~ 50000 - speed 900: 98800 - speed 1200 can try 36825
@@ -114,7 +114,7 @@ int turn_state = 0;
 u16 encoder_turn_state_integral = 0;
 u32 end_of_track_turn_time =0;
 int mode_2_end_flag = 0;
-int demo_mode = 2; /* mode 1: circular rotate, mode 2: straight line loop */
+int demo_mode = 1; /* mode 1: circular rotate, mode 2: straight line loop */
 
 int backForthCounter =0;
 
@@ -139,15 +139,13 @@ void pit3_system_loop(void){
     /****** Case 0: get ccd values and calculate turning command from ccd ~410us ******/
     case 0:
       
-      //gyro_turn=ad_ave(ADC1,AD6b,ADC_12bit,20)-turn_offset;
-      
       if( g_int_ccd_si_counter < pre_set_si_time){
         g_int_ccd_si_counter++;
       }else if(g_int_ccd_operation_state == 0){        
         g_int_ccd_si_counter = 0;         
         ccd_trigger_SI();        
-        ccd_sampling(g_char_ar_ccd_current_pixel , 1);
-        ccd_recongize_left_right_edge_and_return_dir_error(g_char_ar_ccd_current_pixel);        
+        //ccd_sampling(g_char_ar_ccd_current_pixel , 1);
+        //ccd_recongize_left_right_edge_and_return_dir_error(g_char_ar_ccd_current_pixel);        
                 
         /****** ccd dubug ******/
         if(ccd_debug_print_all_message_flag == 1){ // print out all ccd message to UART
@@ -168,7 +166,7 @@ void pit3_system_loop(void){
       }
 
       motor_turn_left+=(motor_command_turn_delta);
-      motor_turn_right+=motor_command_turn_delta;
+      motor_turn_right-=motor_command_turn_delta;
      
     system_mode=1;
     break;
@@ -198,9 +196,9 @@ void pit3_system_loop(void){
         }else{
           motor_pid_counter=0;
           
-          if(demo_mode == 1){
-           motor_turn_left = 80;
-          }
+        if(demo_mode == 1){
+           //motor_turn_left += 1000;
+        }
           /****** stuff here happens every 33*3ms=99ms, used for calculating and capturing encoder motor PID ******/          
           car_speed=g_u32encoder_lf+g_u32encoder_rt;
           econder_integral = econder_integral + g_u32encoder_rt;
@@ -274,19 +272,7 @@ void pit3_system_loop(void){
     system_loop_tick++;
         
     if ( system_loop_tick < mode_selection_start_time_end){ /*** Manual speed selection time , < 1000ms ***/
-          
-      /*
-        if (gpio_get(PORTE, 8) == 0){ // when 3 press
-          if(start_up_press_flag == 0){
-            run_speed_mode = run_speed_mode + 1;
-            if( run_speed_mode > max_available_mode ){
-              run_speed_mode = 0;
-            }
-            start_up_press_flag = 1;
-          }
-        }
-        */
-      
+                
         if(start_up_press_flag == 1){ // lock SW button
           start_up_press_lock_counter++; 
         }
@@ -326,13 +312,13 @@ void pit3_system_loop(void){
           //atan_multiply_value = atan_multiply_value_array[0];     
     }
     
- 
-    //if( system_loop_tick <= (mode_selection_start_time_end + stand_and_dont_move_start_time - 4000)){ 
     if (gpio_get(PORTE, 9) == 0){        // when 1 press
         demo_mode = 1;
     } else if (gpio_get(PORTE, 6) == 0){ // when 4 press
         demo_mode = 2;
+        run_speed_mode = 0;
     } else if (gpio_get(PORTE,8) == 0){
+        demo_mode = 2; // Use demo mode 2 for balance only
         run_speed_mode = 4;
     }
     
@@ -421,14 +407,11 @@ void pit3_system_loop(void){
     
     if(demo_mode == 1){
       run_speed_mode = 0;
-      if(econder_integral >= 250000){
-        end_of_track_wait_flag = 1;
-        econder_integral = 0;
-        motor_turn_left = 80;
-      }
+      current_dir_error = 25;
     }
     
      if(demo_mode == 2){
+       current_dir_error = 0; // reset error to 0
       if(system_loop_tick % 1500 == 0){
         if(run_speed_mode == 0){
           run_speed_mode =5;
@@ -445,9 +428,7 @@ void pit3_system_loop(void){
         this_lap_time_is_count_flag = 1;
       }
       track_reset_end_time_counter++;
-    } /*else if (end_of_track_wait_flag == 0){
-      run_speed_mode = 0;
-    }*/
+    }
     
     /*** reset and unlock the previous policy, able to count next lap ***/
     if(track_reset_end_time_counter == 2000){
